@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 
 app = FastAPI()
 app.counter = 0
-
+app.data = []
 
 @app.get('/')
 def root():
@@ -45,7 +45,15 @@ def counter():
 @app.post("/patient")
 def make_item(item: Patient):
     tmp_json = jsonable_encoder(item)
+    app.data.append(tmp_json)
     new_dict = {"id": counter(), "patient": tmp_json}
     json_compatible_item_data = jsonable_encoder(new_dict)
     return JSONResponse(content=json_compatible_item_data)
 
+
+@app.get("/patient/{pk}")
+def show_patient(pk: int):
+    try:
+        return app.data[pk]
+    except:
+        return "https://en.wikipedia.org/wiki/List_of_HTTP_status_codes"
