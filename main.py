@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 
 
 app = FastAPI()
-app.counter = 0
+app.counter = 1
 
 
 @app.get('/')
@@ -35,7 +35,7 @@ def method_delate():
 
 class Patient(BaseModel):
     name: str
-    surname: str
+    surename: str
 
 
 def counter():
