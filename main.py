@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 
 
 app = FastAPI()
-app.counter = 1
+app.counter = 0
 
 
 @app.get('/')
@@ -44,7 +44,8 @@ def counter():
 
 @app.post("/items")
 def make_item(item: Patient):
-    new_dict = {"id": counter(), "patient": item}
+    tmp_json = jsonable_encoder(item)
+    new_dict = {"id": counter(), "patient": tmp_json}
     json_compatible_item_data = jsonable_encoder(new_dict)
     return JSONResponse(content=json_compatible_item_data)
 
