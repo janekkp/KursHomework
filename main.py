@@ -56,4 +56,4 @@ def show_patient(pk: int):
     try:
         return app.data[pk]
     except:
-        return 204
+        pass
