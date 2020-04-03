@@ -40,7 +40,7 @@ class Patient(BaseModel):
 
 def counter():
     app.counter += 1
-    return int(app.counter)
+    return (int(app.counter) - 1)
 
 @app.post("/patient")
 def make_item(item: Patient):
