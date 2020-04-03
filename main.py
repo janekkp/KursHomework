@@ -56,4 +56,4 @@ def show_patient(pk: int):
     try:
         return app.data[pk]
     except:
-        return "https://en.wikipedia.org/wiki/List_of_HTTP_status_codes"
+        return 204
