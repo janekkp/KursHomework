@@ -42,7 +42,7 @@ def counter():
     app.counter += 1
     return int(app.counter)
 
-@app.post("/items")
+@app.post("/patient")
 def make_item(item: Patient):
     tmp_json = jsonable_encoder(item)
     new_dict = {"id": counter(), "patient": tmp_json}
