@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-
+import http
 
 app = FastAPI()
 app.counter = 0
@@ -56,4 +56,5 @@ def show_patient(pk: int):
     try:
         return app.data[pk]
     except:
-        pass
+        return http.HTTPStatus.NO_CONTENT
+
