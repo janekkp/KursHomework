@@ -1,6 +1,11 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
+
 
 app = FastAPI()
+app.counter = 0
 
 
 @app.get('/')
@@ -26,3 +31,20 @@ def method_put():
 @app.delete('/method')
 def method_delate():
     return {"method": "DELETE"}
+
+
+class Patient(BaseModel):
+    name: str
+    surname: str
+
+
+def counter():
+    app.counter += 1
+    return int(app.counter)
+
+@app.post("/items")
+def make_item(item: Patient):
+    new_dict = {"id": counter(), "patient": item}
+    json_compatible_item_data = jsonable_encoder(new_dict)
+    return JSONResponse(content=json_compatible_item_data)
+
