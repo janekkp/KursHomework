@@ -73,7 +73,7 @@ def show_patient(pk: int):
 
 
 
-@app.get("/users/me")
+@app.post("/login")
 def read_current_user(response: Response, credentials: HTTPBasicCredentials = Depends(HTTPBasic)):
     if credentials.username in app.users.keys() and app.users[credentials.username] == credentials.password:
         session_token = sha256(bytes(f"{credentials.username}{credentials.password}{app.secret_key}", encoding="utf8")).hexdigest()
