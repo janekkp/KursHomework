@@ -1,9 +1,8 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Cookie
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
-from fastapi.responses import Response, RedirectResponse
+from fastapi.responses import Response, JSONResponse
 from hashlib import sha256
 import http
 
@@ -22,9 +21,6 @@ def root():
     return {"message": "Hello World during the coronavirus pandemic!"}
 
 
-@app.get('/welcome')
-def welcome():
-    return {"message": "Welcome to the server"}
 
 @app.post('/method')
 def method_post():
@@ -72,13 +68,20 @@ def show_patient(pk: int):
         return Response(status_code=http.HTTPStatus.NO_CONTENT)
 
 
+@app.get('/welcome')
+def welcome(request:Response, session_token = Cookie(None)):
+    if session_token in app.tokens:
+        return {"message": "Welcome to the server"}
+    else:
+        raise HTTPException(status_code=401)
+
 
 @app.post("/login")
-def read_current_user(response: Response, credentials: HTTPBasicCredentials = Depends(HTTPBasic)):
-    if credentials.username in app.users.keys() and app.users[credentials.username] == credentials.password:
+def loging(response: Response, credentials: HTTPBasicCredentials = Depends(HTTPBasic)):
+    if credentials.username in app.users and app.users[credentials.username] == credentials.password:
         session_token = sha256(bytes(f"{credentials.username}{credentials.password}{app.secret_key}", encoding="utf8")).hexdigest()
         response.set_cookie(key="session_token", value=session_token)
-        app.tokens += session_token
+        app.tokens.append(session_token)
         response.status_code = 307
         response.headers["Location"] = "/welcome"
         return response
