@@ -1,13 +1,21 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from fastapi.responses import Response
+from fastapi.responses import Response, RedirectResponse
+from hashlib import sha256
 import http
+
+
+
 
 app = FastAPI()
 app.counter = 0
 app.data = []
+app.secret_key = "secret"
+app.users = {"trudnY": "PaC13Nt"}
+app.tokens = []
 
 @app.get('/')
 def root():
@@ -63,3 +71,18 @@ def show_patient(pk: int):
     except:
         return Response(status_code=http.HTTPStatus.NO_CONTENT)
 
+
+security = HTTPBasic
+
+
+@app.get("/users/me")
+def read_current_user(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
+    if credentials.username in app.users.keys() and app.users[credentials.username] == credentials.password:
+        session_token = sha256(bytes(f"{credentials.username}{credentials.password}{app.secret_key}", encoding="utf8")).hexdigest()
+        response.set_cookie(key="session_token", value=session_token)
+        app.tokens += session_token
+        response.set_cookie(key="session_token", value=session_token)
+        response.headers["Location"] = "/welcome"
+        response.status_code = status.HTTP_302_FOUND
+    else:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
