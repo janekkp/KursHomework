@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, Cookie, Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import Response, JSONResponse
+from fastapi.responses import Response, JSONResponse, RedirectResponse
 from hashlib import sha256
 import http
 
@@ -13,7 +13,7 @@ app = FastAPI()
 app.counter = 0
 app.data = []
 app.secret_key = "secret"
-app.users = {"trudnY": "PaC13Nt"}
+app.users = {"trudnY": "PaC13Nt", "admin": "admin"}
 app.tokens = []
 
 @app.get('/')
@@ -69,11 +69,9 @@ def show_patient(pk: int):
 
 
 @app.get('/welcome')
-def welcome(request: Request, session_token = Cookie(None)):
-    if session_token in app.tokens:
+def welcome():
         return {"message": "Welcome to the server"}
-    else:
-        raise HTTPException(status_code=401)
+
 
 
 @app.post("/login")
@@ -83,7 +81,6 @@ def loging(response: Response, credentials: HTTPBasicCredentials = Depends(HTTPB
         response.set_cookie(key="session_token", value=session_token)
         app.tokens.append(session_token)
         response.status_code = 307
-        response.headers["Location"] = "/welcome"
-        return response
+        return welcome()
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
