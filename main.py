@@ -77,7 +77,7 @@ def welcome(request: Request, session_token = Cookie(None)):
 
 
 @app.post("/login")
-def loging(response: Response, credentials: HTTPBasicCredentials = Depends(HTTPBasic)):
+def loging(response: Response, credentials: HTTPBasicCredentials = Depends(HTTPBasic())):
     if credentials.username in app.users and app.users[credentials.username] == credentials.password:
         session_token = sha256(bytes(f"{credentials.username}{credentials.password}{app.secret_key}", encoding="utf8")).hexdigest()
         response.set_cookie(key="session_token", value=session_token)
