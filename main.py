@@ -14,6 +14,10 @@ def root():
     return {"message": "Hello World during the coronavirus pandemic!"}
 
 
+@app.get('/welcome')
+def welcome():
+    return {"message": "Welcome to the server"}
+
 @app.post('/method')
 def method_post():
     return {"method": "POST"}
