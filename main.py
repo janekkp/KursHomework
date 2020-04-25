@@ -72,16 +72,15 @@ def show_patient(pk: int):
         return Response(status_code=http.HTTPStatus.NO_CONTENT)
 
 
-security = HTTPBasic
-
 
 @app.get("/users/me")
-def read_current_user(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
+def read_current_user(response: Response, credentials: HTTPBasicCredentials = Depends(HTTPBasic)):
     if credentials.username in app.users.keys() and app.users[credentials.username] == credentials.password:
         session_token = sha256(bytes(f"{credentials.username}{credentials.password}{app.secret_key}", encoding="utf8")).hexdigest()
         response.set_cookie(key="session_token", value=session_token)
         app.tokens += session_token
-        response.set_cookie(key="session_token", value=session_token)
-        return RedirectResponse(url='/welcome')
+        response.status_code = 307
+        response.headers["Location"] = "/welcome"
+        return response
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
