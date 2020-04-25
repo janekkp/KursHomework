@@ -82,7 +82,6 @@ def read_current_user(response: Response, credentials: HTTPBasicCredentials = De
         response.set_cookie(key="session_token", value=session_token)
         app.tokens += session_token
         response.set_cookie(key="session_token", value=session_token)
-        response.headers["Location"] = "/welcome"
-        response.status_code = status.HTTP_302_FOUND
+        return RedirectResponse(url='/welcome')
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
