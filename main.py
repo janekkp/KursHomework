@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status, Cookie, Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
+from fastapi.templating import Jinja2Templates
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import Response, JSONResponse, RedirectResponse
 from hashlib import sha256
@@ -70,9 +71,14 @@ def show_patient(pk: int):
         return Response(status_code=http.HTTPStatus.NO_CONTENT)
 
 
+templates = Jinja2Templates(directory="templates")
+
+
 @app.get('/welcome')
-def welcoming():
-        return {"message": "Welcome to the server"}
+def welcoming(request: Request, session_token: str = Cookie(None)):
+    if session_token not in app.session_tokens:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    return templates.TemplateResponse("item.html", {"request": request, "user": "trudnY"})
 
 
 
