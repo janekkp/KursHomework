@@ -12,9 +12,10 @@ import http
 app = FastAPI()
 app.counter = 0
 app.data = []
-app.secret_key = "secret"
+app.secret = "secret"
 app.users = {"trudnY": "PaC13Nt", "admin": "admin"}
 app.tokens = []
+
 
 @app.get('/')
 def root():
@@ -69,7 +70,7 @@ def show_patient(pk: int):
 
 
 @app.get('/welcome')
-def welcome():
+def welcoming():
         return {"message": "Welcome to the server"}
 
 
@@ -77,10 +78,13 @@ def welcome():
 @app.post("/login")
 def loging(response: Response, credentials: HTTPBasicCredentials = Depends(HTTPBasic())):
     if credentials.username in app.users and app.users[credentials.username] == credentials.password:
-        session_token = sha256(bytes(f"{credentials.username}{credentials.password}{app.secret_key}", encoding="utf8")).hexdigest()
+        session_token = sha256(bytes(f"{credentials.username}{credentials.password}{app.secret}", encoding="utf8")).hexdigest()
         response.set_cookie(key="session_token", value=session_token)
         app.tokens.append(session_token)
-        response.status_code = 307
-        return welcome()
+        response.status_code = 302
+        #response.headers["Location"] = "/welcome"
+        RedirectResponse(url='/welcome')
+        return response
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
