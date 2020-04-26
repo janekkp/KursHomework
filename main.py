@@ -89,7 +89,7 @@ def login(response: Response, credentials: HTTPBasicCredentials = Depends(HTTPBa
         response.set_cookie(key="session_token", value=session_token)
         app.session_tokens.append(session_token)
         response.status_code = 302
-        response.headers["Location"] = 'welcome'
+        response.headers["Location"] = '/welcome'
         return response
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
