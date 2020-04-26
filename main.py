@@ -14,7 +14,8 @@ app.counter = 0
 app.data = []
 app.secret = "secret"
 app.users = {"trudnY": "PaC13Nt", "admin": "admin"}
-app.tokens = []
+app.session_tokens = []
+
 
 
 @app.get('/')
@@ -76,14 +77,24 @@ def welcoming():
 
 
 @app.post("/login")
-def loging(response: Response, credentials: HTTPBasicCredentials = Depends(HTTPBasic())):
+def login(response: Response, credentials: HTTPBasicCredentials = Depends(HTTPBasic())):
     if credentials.username in app.users and app.users[credentials.username] == credentials.password:
         session_token = sha256(bytes(f"{credentials.username}{credentials.password}{app.secret}", encoding="utf8")).hexdigest()
         response.set_cookie(key="session_token", value=session_token)
-        app.tokens.append(session_token)
+        app.session_tokens.append(session_token)
         response.status_code = 302
         response.headers["Location"] = 'welcome'
         return response
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
+
+@app.post("/logout")
+def logout(response: Response, session_token:str = Cookie(None)):
+    if session_token not in app.session_tokens:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    response.status_code = 302
+    response.headers["Location"] = '/'
+    app.session_tokens.remove(session_token)
+    return response
 
