@@ -82,8 +82,7 @@ def loging(response: Response, credentials: HTTPBasicCredentials = Depends(HTTPB
         response.set_cookie(key="session_token", value=session_token)
         app.tokens.append(session_token)
         response.status_code = 302
-        #response.headers["Location"] = "/welcome"
-        RedirectResponse(url='/welcome')
+        response.headers["Location"] = 'welcome'
         return response
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
