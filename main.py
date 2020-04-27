@@ -84,12 +84,12 @@ def show_patient(id: int, response: Response, session_token : str = Cookie(None)
     return status.HTTP_204_NO_CONTENT
 
 
-@app.delete('/patinet/{id}')
-def delete_patient(id: int, response: Response, session_token : str = Cookie(None)):
+@app.delete('/patient/{id}')
+def delete_patient(id: int, response: Response, session_token:str = Cookie(None)):
     if session_token not in app.session_tokens:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     app.patients.pop(id, None)
-    return status.HTTP_204_NO_CONTENT
+    response.status_code = status.HTTP_204_NO_CONTENT
 
 
 
