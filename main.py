@@ -140,5 +140,5 @@ async def shutdown():
 @app.get("/tracks")
 async def show_tracks(page: int = 0, per_page: int = 10):
     cursor = app.db_connection.cursor()
-    tracks = cursor.execute("SELECT * FROM tracks ORDER BY TrackID LIMIT ? OFFSET ?", (per_page, per_page*page)).fetchall()
+    tracks = cursor.execute("SELECT * FROM tracks ORDER BY trackID LIMIT ? OFFSET ?", (per_page, per_page*page)).fetchall()
     return tracks
