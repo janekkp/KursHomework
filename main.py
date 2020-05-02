@@ -148,10 +148,10 @@ async def show_tracks(page: int = 0, per_page: int = 10):
 
 @app.get('/tracks/composers/')
 async def show_composer(composer_name : str):
-    try:
-        app.db_connection.row_factory = sqlite3.Row
-        titles = app.db_connection.execute(''' SELECT name FROM tracks WHERE composer = ?''',
-                                           (composer_name,)).fetchall()
-        return titles
-    except HTTPException:
-        return HTTPException(status_code=404, detail={"error":str})
+    app.db_connection.row_factory = sqlite3.Row
+    titles = app.db_connection.execute(''' SELECT name FROM tracks WHERE composer = ?''',
+                                        (composer_name,)).fetchall()
+    if len(titles) == 0:
+        raise HTTPException(status_code=404, detail={"error": "Composer not found"})
+    return titles
+
