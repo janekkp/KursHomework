@@ -48,6 +48,7 @@ def counter():
     app.counter += 1
     return int(app.counter) - 1
 
+
 # @app.post("/patient")
 # def make_item(item: Patient):
 #     tmp_json = jsonable_encoder(item)
@@ -76,7 +77,7 @@ def patients(session_token: str = Cookie(None)):
 
 
 @app.get("/patient/{id}")
-def show_patient(id: int, response: Response, session_token : str = Cookie(None)):
+def show_patient(id: int, response: Response, session_token: str = Cookie(None)):
     if session_token not in app.session_tokens:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     response.set_cookie(key="session_token", value=session_token)
@@ -86,12 +87,11 @@ def show_patient(id: int, response: Response, session_token : str = Cookie(None)
 
 
 @app.delete('/patient/{id}')
-def delete_patient(id: int, response: Response, session_token:str = Cookie(None)):
+def delete_patient(id: int, response: Response, session_token: str = Cookie(None)):
     if session_token not in app.session_tokens:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     app.patients.pop(id, None)
     response.status_code = status.HTTP_204_NO_CONTENT
-
 
 
 templates = Jinja2Templates(directory="templates")
@@ -107,7 +107,8 @@ def welcoming(request: Request, session_token: str = Cookie(None)):
 @app.post("/login")
 def login(response: Response, credentials: HTTPBasicCredentials = Depends(HTTPBasic())):
     if credentials.username in app.users and app.users[credentials.username] == credentials.password:
-        session_token = sha256(bytes(f"{credentials.username}{credentials.password}{app.secret}", encoding="utf8")).hexdigest()
+        session_token = sha256(
+            bytes(f"{credentials.username}{credentials.password}{app.secret}", encoding="utf8")).hexdigest()
         response.set_cookie(key="session_token", value=session_token)
         app.session_tokens.append(session_token)
         response.status_code = 302
@@ -119,7 +120,7 @@ def login(response: Response, credentials: HTTPBasicCredentials = Depends(HTTPBa
 
 
 @app.post("/logout")
-def logout(response: Response, session_token:str = Cookie(None)):
+def logout(response: Response, session_token: str = Cookie(None)):
     if session_token not in app.session_tokens:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     response.status_code = 302
@@ -142,16 +143,15 @@ async def shutdown():
 async def show_tracks(page: int = 0, per_page: int = 10):
     app.db_connection.row_factory = sqlite3.Row
     tracks = app.db_connection.execute('''SELECT * FROM tracks ORDER BY TrackID LIMIT ? OFFSET ?''',
-                                       (per_page, per_page*page)).fetchall()
+                                       (per_page, per_page * page)).fetchall()
     return tracks
 
 
 @app.get('/tracks/composers/')
-async def show_composer(composer_name : str):
-    app.db_connection.row_factory = sqlite3.Row
-    titles = app.db_connection.execute(''' SELECT name FROM tracks WHERE composer = ?''',
-                                        (composer_name,)).fetchall()
+async def show_composer(composer_name: str):
+    app.db_connection.row_factory = lambda cur, x:x[0]
+    titles = app.db_connection.execute(''' SELECT name FROM tracks WHERE composer = ? ORDER BY name''',
+                                       (composer_name,)).fetchall()
     if len(titles) == 0:
         raise HTTPException(status_code=404, detail={"error": "Composer not found"})
     return titles
-
