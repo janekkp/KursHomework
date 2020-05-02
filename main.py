@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import Response
 from hashlib import sha256
+import sqlite3
 
 app = FastAPI()
 app.counter = 0
@@ -126,3 +127,18 @@ def logout(response: Response, session_token:str = Cookie(None)):
     app.session_tokens.remove(session_token)
     return response
 
+
+@app.on_event("startup")
+async def startup():
+    app.db_connection = sqlite3.connect('chinook.db')
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    app.db_connection.close()
+
+@app.get("/tracks")
+async def show_tracks(page: int = 0, per_page: int = 10):
+    cursor = app.db_connection.cursor()
+    tracks = cursor.execute("SELECT * FROM tracks ORDER BY TrackID LIMIT ? OFFSET ?", (per_page, per_page*page)).fetchall()
+    return tracks
