@@ -144,3 +144,14 @@ async def show_tracks(page: int = 0, per_page: int = 10):
     tracks = app.db_connection.execute('''SELECT * FROM tracks ORDER BY TrackID LIMIT ? OFFSET ?''',
                                        (per_page, per_page*page)).fetchall()
     return tracks
+
+
+@app.get('/tracks/composers/')
+async def show_composer(composer_name : str):
+    try:
+        app.db_connection.row_factory = sqlite3.Row
+        titles = app.db_connection.execute(''' SELECT name FROM tracks WHERE composer = ?''',
+                                           (composer_name,)).fetchall()
+        return titles
+    except HTTPException:
+        return HTTPException(status_code=404, detail={"error":str})
