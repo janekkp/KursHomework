@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import Response
 from hashlib import sha256
 import sqlite3
+import json
 
 app = FastAPI()
 app.counter = 0
@@ -155,3 +156,35 @@ async def show_composer(composer_name: str):
     if len(titles) == 0:
         raise HTTPException(status_code=404, detail={"error": "Composer not found"})
     return titles
+
+
+class Album(BaseModel):
+    title: str
+    artist_id: int
+
+
+@app.post('/albums')
+async def add_album(response:Response, album: Album):
+    cursor = app.db_connection.execute('''SELECT ArtistId FROM artists WHERE ArtistId = "artist_id"''',
+                                       {'artist_id': album.artist_id})
+    artist = cursor.fetchall()
+    if artist is None:
+        raise HTTPException(status_code=404, detail={"error:" "No artist"})
+    cursor = app.db_connection.execute('''INSERT INTO albums (Title, ArtistId)  VALUES (:title, :artist_id)''',
+                                             {'artist_id': album.artist_id, 'title': album.title})
+    app.db_connection.commit()
+    response.status_code = 201
+
+    return {"AlbumId": cursor.lastrowid, "Title": album.title, "ArtistId": album.artist_id}
+
+
+
+@app.get("/albums/{album_id}", status_code=201)
+async def check_album(album_title):
+    app.db_connection.row_factory = sqlite3.Row
+    curosr = app.db_connection.execute('''
+    SELECT * FROM albums WHERE Title = ?''', (album_title, ))
+    album = curosr.fetchone()
+    if album is None:
+        raise HTTPException(status_code=404, detail={"error:" "No album"})
+    return album
