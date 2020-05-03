@@ -178,7 +178,7 @@ async def add_album(response:Response, album: Album):
 
 
 
-@app.get("/albums/{album_id}", status_code=202)
+@app.get("/albums/{album_id}", status_code=200)
 async def check_album(album_title):
     app.db_connection.row_factory = sqlite3.Row
     curosr = app.db_connection.execute('''
