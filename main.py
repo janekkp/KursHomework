@@ -167,7 +167,7 @@ class Album(BaseModel):
 async def add_album(response:Response, album: Album):
     cursor = app.db_connection.execute('''SELECT ArtistId FROM artists WHERE ArtistId = "artist_id"''',
                                        {'artist_id': album.artist_id})
-    artist = cursor.fetchone()
+    artist = cursor.fetchall()
     if artist is None:
         response.status_code = status.HTTP_404_NOT_FOUND
         return {"detail":{"error:" "No artist"}}
