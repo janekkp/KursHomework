@@ -178,12 +178,13 @@ async def add_album(response:Response, album: Album):
 
 
 
-@app.get("/albums/{album_id}", status_code=200)
-async def check_album(album_title):
+@app.get("/albums/{album_id}")
+async def check_album(response: Response, album_title):
     app.db_connection.row_factory = sqlite3.Row
     curosr = app.db_connection.execute('''
     SELECT * FROM albums WHERE Title = ?''', (album_title, ))
     album = curosr.fetchone()
     if album is None:
         raise HTTPException(status_code=404, detail={"error:" "No album"})
+    response.status_code = 200
     return album
