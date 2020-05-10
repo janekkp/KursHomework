@@ -188,3 +188,23 @@ async def check_album(album_id: int):
     # if album is None:
     #     raise HTTPException(status_code=404, detail={"error:" "No album"})
     return album
+
+
+@app.put('/customers/{customer_id}')
+def put_customer(customer_id: int, request: dict={}):
+    app.db_connection.row_factory = sqlite3.Row
+    customer = app.db_connection.execute("SELECT * FROM customers WHERE CustomerId = ?", (customer_id,)).fetchall()
+
+    if not customer:
+        raise HTTPException (status_code=404, detail={"error:" "No customer"})
+
+    queue = "UPDATE customers SET "
+
+    if request:
+        for key in request:
+            queue += f"{key} = \'{request[key]}\', "
+        queue = queue[:-2]
+        queue += " WHERE CustomerId = " + str(customer_id)
+        app.db_connection.execute(queue)
+        app.db_connection.commit()
+    return app.db_connection.execute("SELECT * FROM customers WHERE CustomerId = ?", (customer_id,)).fetchone()
