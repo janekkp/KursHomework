@@ -168,7 +168,7 @@ async def add_album(response:Response, album: Album):
     cursor = app.db_connection.execute('''SELECT ArtistId FROM artists WHERE ArtistId = "artist_id"''',
                                        {'artist_id': album.artist_id})
     artist = cursor.fetchall()
-    if len(artist) < 1:
+    if len(artist) == 0:
         response.status_code = status.HTTP_404_NOT_FOUND
         return {"detail":{"error:" "No artist"}}
     cursor = app.db_connection.execute('''INSERT INTO albums (Title, ArtistId)  VALUES (:title, :artist_id)''',
