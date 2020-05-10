@@ -191,7 +191,7 @@ async def check_album(album_id: int):
 
 
 @app.put('/customers/{customer_id}')
-def edit_customer_data(customer_id: int, customer_update_data: dict):
+async def edit_customer_data(customer_id: int, customer_update_data: dict):
     cursor = app.db_connection.execute(
         "SELECT CustomerId FROM customers WHERE CustomerId = ?", (customer_id,)
     )
