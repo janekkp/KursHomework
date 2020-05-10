@@ -191,20 +191,38 @@ async def check_album(album_id: int):
 
 
 @app.put('/customers/{customer_id}')
-def put_customer(customer_id: int, request: dict={}):
+def edit_customer_data(customer_id: int, customer_update_data: dict):
+    cursor = app.db_connection.execute(
+        "SELECT CustomerId FROM customers WHERE CustomerId = ?", (customer_id,)
+    )
+    result = cursor.fetchone()
+    if result is None:
+        raise HTTPException(
+            status_code=404, detail={"error": "Customer with given ID does not exist."}
+        )
+    list_of_possible_fields_to_update = (
+        "company",
+        "address",
+        "city",
+        "state",
+        "country",
+        "postalcode",
+        "fax",
+    )
+    fields_to_update = []
+
+    for key, val in customer_update_data.items():
+        if key in list_of_possible_fields_to_update:
+            fields_to_update.append(f"{key}='{val}'")
+
+    update_values = ", ".join(fields_to_update)
+    sql_stmt = f"UPDATE customers SET {update_values} WHERE customerid={customer_id}"
+    cursor = app.db_connection.execute(sql_stmt)
+    app.db_connection.commit()
+
     app.db_connection.row_factory = sqlite3.Row
-    customer = app.db_connection.execute("SELECT * FROM customers WHERE CustomerId = ?", (customer_id,)).fetchall()
-
-    if not customer:
-        raise HTTPException (status_code=404, detail={"error:" "No customer"})
-
-    queue = "UPDATE customers SET "
-
-    if request:
-        for key in request:
-            queue += f"{key} = \'{request[key]}\', "
-        queue = queue[:-2]
-        queue += " WHERE CustomerId = " + str(customer_id)
-        app.db_connection.execute(queue)
-        app.db_connection.commit()
-    return app.db_connection.execute("SELECT * FROM customers WHERE CustomerId = ?", (customer_id,)).fetchone()
+    cursor = app.db_connection.execute(
+        "SELECT * FROM customers WHERE CustomerId = ?", (customer_id,)
+    )
+    customer = cursor.fetchone()
+    return customer
